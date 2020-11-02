@@ -10,3 +10,4 @@ Browse and view objects in an Amazon S3 bucket.  Supports gallery uploads.
 #Creates Directories and adds multimedia to the folder.
 branch12
 pull test
+from git
