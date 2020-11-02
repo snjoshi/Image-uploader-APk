@@ -1,14 +1,10 @@
-# Yet Another Sync Software for Android
+# ByteSeq Android Application to Upload the Images to S3 bucket
 
-Browse and view objects in an Amazon S3 bucket.  Supports automatic camera uploads.
+Browse and view objects in an Amazon S3 bucket.  Supports gallery uploads.
 
 # References
 
-* [S3Anywhere](http://www.lysesoft.com/products/s3anywhere/) - closed-source S3 client for Android
-* [Syncthing](https://syncthing.net/) - sync between agents on desktop and Android
+* [S3Anywhere]- closed-source S3 client for Android
+* [Syncthing]- sync between agents on desktop and Android
 
-# License
-
-Copyright (C) 2017 Andrew Gaul
-
-Licensed under the GNU General Public License, Version 3.0
+#Creates Directories and adds multimedia to the folder.
