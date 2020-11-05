@@ -92,7 +92,7 @@ public final class MainActivity extends AppCompatActivity {
             };
 
     //String [] SelectedImageList;
-    private final List<String> SelectedImageList = new ArrayList<String>();
+    private static List<String> SelectedImageList = new ArrayList<String>();
 
 
     private final int PICK_IMAGE_MULTIPLE =20;
@@ -246,6 +246,7 @@ public final class MainActivity extends AppCompatActivity {
 
     }
 
+
     public void uploadimage(View view) {
         // projectName="Suraj12";
 //        Intent intent = new Intent();
@@ -256,12 +257,16 @@ public final class MainActivity extends AppCompatActivity {
         view1=view;
         SelectedImageList.clear();
 //
+         // ACTION_PICK: pick an item from data returning what was selected
+        //MediaStore.Video.Media.INTERNAL_CONTENT_URI: uri fro internal storage;
         Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.INTERNAL_CONTENT_URI);
+        //setType() parameter tells the type of data we want to force user to  select from intent;
         gallery.setType("*/*");
 //        gallery.setType("video/*");
+        //EXTRA_ALLOW_MULTIPLE: allows to select multiple images;
         gallery.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        //start the activity with request code pick images;
         startActivityForResult(gallery, PICK_IMAGE);
-
 //        Intent mediaChooser = new Intent(Intent.ACTION_GET_CONTENT);
 ////comma-separated MIME types
 //        mediaChooser.setType("video/*, image/*");
@@ -317,6 +322,12 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //add selected files to SelectedImageList
+//        if(resultCode==RESULT_OK)
+//        {
+//            Uri uri=data.getData();
+//            SelectedImageList.add(uri.getPath());
+//        }
 
 //
 //        if (resultCode == Activity.RESULT_OK)
@@ -448,6 +459,21 @@ public final class MainActivity extends AppCompatActivity {
                    // new Thread(new Runnable() {
                       //  public void run(){
                             new UploadFilesTask().execute(path,file);
+                    //delete all the selected files
+                    File curr = new File(file);
+                    if(curr.exists())
+                    {
+                        if(curr.delete())
+                        {
+                            System.out.println("file deleted");
+                        }
+                        else {
+                            System.out.println("file not deleted");
+                        }
+                    }
+                    else{
+                        System.out.println("file not deleted");
+                    }
                        // }
                    // }).start();
 
@@ -792,16 +818,18 @@ public final class MainActivity extends AppCompatActivity {
         final String secretKey;
         final String bucketName;
         final String endpoint;
+        final  String region;
         final boolean cameraUpload;
         final boolean cameraUploadOnlyOnWifi;
 
         YassPreferences(Context context) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             // TODO: should default values be null?
-            this.accessKey = "";//prefs.getString("access_key", "access_key");
-            this.secretKey = "";//prefs.getString("secret_key", "secret_key");
-            this.bucketName = "";//prefs.getString("bucket_name", "bucket_name");
-            this.endpoint = "";//prefs.getString("endpoint", null);
+            this.accessKey = "IQLTGIEXYLPOP597U7H0";//prefs.getString("access_key", "access_key");
+            this.secretKey = "O57ghawVXgUAdYaLsOe0Pgv4UwM6A7hWFtmk1SLh";//prefs.getString("secret_key", "secret_key");
+            this.bucketName = "test222";//prefs.getString("bucket_name", "bucket_name");
+            this.region="us-east-1";
+            this.endpoint = "s3.wasabisys.com";//prefs.getString("endpoint", null);
             this.cameraUpload = prefs.getBoolean("camera_upload", false);
             this.cameraUploadOnlyOnWifi = prefs.getBoolean("camera_upload_only_on_wifi", false);
         }
