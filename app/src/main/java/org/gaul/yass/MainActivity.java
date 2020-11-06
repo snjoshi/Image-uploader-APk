@@ -477,14 +477,19 @@ public final class MainActivity extends AppCompatActivity {
                 {
 
                     Log.i(null,uri.getPath()+" hello there");
-//            file.delete();
+//                  file.delete();
                     String y=getRealPathFromURI(uri);
                     File file = new File(y);
                     if (file.exists()) {
                         ContentResolver contentResolver = getContentResolver();
                         contentResolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                                 MediaStore.Images.ImageColumns.DATA + "=?" , new String[]{ y });
-                        Log.i(null,"file deletion success");
+                        if(!file.exists())
+                            Log.i(null,"file deletion success");
+                        else{
+                            file.delete();
+                            Log.i(null,"file could not be deleted");
+                        }
                     }
                     else{
                         Log.i(null,"file does not exists");
