@@ -15,10 +15,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
@@ -93,7 +95,7 @@ public final class MainActivity extends AppCompatActivity {
 
     //String [] SelectedImageList;
     private static List<String> SelectedImageList = new ArrayList<String>();
-
+    private static List<Uri> selectedImageUri = new ArrayList<>();
 
     private final int PICK_IMAGE_MULTIPLE =20;
 
@@ -141,7 +143,7 @@ public final class MainActivity extends AppCompatActivity {
 
 
 
-            client.putObject(new PutObjectRequest("designers", x[0].replace((char)1,'/')+filename, file));
+            client.putObject(new PutObjectRequest("test222", x[0].replace((char)1,'/')+filename, file));
 //            .withMetadata(new ObjectMetadata()));
 //
             System.out.println("Okay "+filename);
@@ -191,7 +193,7 @@ public final class MainActivity extends AppCompatActivity {
                 try {
 
                     System.out.println("File opened");
-                    client.putObject(new PutObjectRequest("designers", foldName, emptyContent,metadata));
+                    client.putObject(new PutObjectRequest("test222", foldName, emptyContent,metadata));
                     System.out.println("Okay");
                     new BlobListTask().execute("");
                     Snackbar.make(view1, "Project Created", 3000)
@@ -256,6 +258,7 @@ public final class MainActivity extends AppCompatActivity {
 //        startActivityForResult(Intent.createChooser(intent,"Select Picture"), 1);
         view1=view;
         SelectedImageList.clear();
+        selectedImageUri.clear();
 //
          // ACTION_PICK: pick an item from data returning what was selected
         //MediaStore.Video.Media.INTERNAL_CONTENT_URI: uri fro internal storage;
@@ -322,12 +325,12 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //add selected files to SelectedImageList
-//        if(resultCode==RESULT_OK)
-//        {
-//            Uri uri=data.getData();
-//            SelectedImageList.add(uri.getPath());
-//        }
+//        add selected files to SelectedImageList
+        if(resultCode==RESULT_OK)
+        {
+            Uri uri=data.getData();
+            selectedImageUri.add(uri);
+        }
 
 //
 //        if (resultCode == Activity.RESULT_OK)
@@ -452,35 +455,49 @@ public final class MainActivity extends AppCompatActivity {
                 dialog.show();
 
                 progress=0;
-
                 for(final String file:SelectedImageList)
                 {
 
                    // new Thread(new Runnable() {
                       //  public void run(){
                             new UploadFilesTask().execute(path,file);
+
                     //delete all the selected files
-                    File curr = new File(file);
-                    if(curr.exists())
-                    {
-                        if(curr.delete())
-                        {
-                            System.out.println("file deleted");
-                        }
-                        else {
-                            System.out.println("file not deleted");
-                        }
-                    }
-                    else{
-                        System.out.println("file not deleted");
-                    }
+
                        // }
                    // }).start();
 
                 }
             }
         });
+        Context context = this;
+//        Log.i(null,"size of uris is "+selectedImageUri.size());
+//        System.out.println(selectedImageUri.size());
+        for(Uri uri:selectedImageUri)
+        {
+            File file = new File(uri.getPath());
+            Log.i(null,uri.getPath());
+//            file.delete();
 
+            if (file.exists()){
+                file.setWritable(true, false);
+                String where = MediaStore.Audio.Media.DATA +"=\""+ uri.getPath() +"\"";
+                if (context.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, where, null) == 1){
+                    if (file.exists()){
+                        Boolean d = file.delete();
+                        if(d)
+                        {
+                            Log.i(null,"file deleted success");
+                        }
+                        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+                    }
+                    Log.i(null,"file deleted");
+                }
+            }
+            else{
+                Log.i(null,"file does not exists");
+            }
+        }
 /////////////////////////////////////
 
 
@@ -547,6 +564,26 @@ public final class MainActivity extends AppCompatActivity {
 //                Log.i("Result", x);
 //        }
 
+        }
+    }
+
+    public void callBroadCast() {
+        if (Build.VERSION.SDK_INT >= 14) {
+            Log.e("-->", " >= 14");
+            MediaScannerConnection.scanFile(this, new String[]{Environment.getExternalStorageDirectory().toString()}, null, new MediaScannerConnection.OnScanCompletedListener() {
+                /*
+                 *   (non-Javadoc)
+                 * @see android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String, android.net.Uri)
+                 */
+                public void onScanCompleted(String path, Uri uri) {
+                    Log.e("ExternalStorage", "Scanned " + path + ":");
+                    Log.e("ExternalStorage", "-> uri=" + uri);
+                }
+            });
+        } else {
+            Log.e("-->", " < 14");
+            sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                    Uri.parse("file://" + Environment.getExternalStorageDirectory())));
         }
     }
 
