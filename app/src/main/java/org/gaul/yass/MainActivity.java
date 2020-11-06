@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -270,6 +271,8 @@ public final class MainActivity extends AppCompatActivity {
         gallery.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         //start the activity with request code pick images;
         startActivityForResult(gallery, PICK_IMAGE);
+//        Context context = this;
+
 //        Intent mediaChooser = new Intent(Intent.ACTION_GET_CONTENT);
 ////comma-separated MIME types
 //        mediaChooser.setType("video/*, image/*");
@@ -366,7 +369,7 @@ public final class MainActivity extends AppCompatActivity {
             /////////////////////////////////
             ClipData mClipData = data.getClipData();
             if (mClipData==null)
-            {Log.i("Info", "Single Imag Selected");
+            {Log.i("Info", "Single Image Selected");
                 Uri uri = data.getData();
                 String[] projection = { MediaStore.Video.Media.DATA };
                 Cursor cursor = managedQuery(uri, projection, null, null, null);
@@ -468,36 +471,30 @@ public final class MainActivity extends AppCompatActivity {
                    // }).start();
 
                 }
-            }
-        });
-        Context context = this;
-//        Log.i(null,"size of uris is "+selectedImageUri.size());
-//        System.out.println(selectedImageUri.size());
-        for(Uri uri:selectedImageUri)
-        {
-            File file = new File(uri.getPath());
-            Log.i(null,uri.getPath());
-//            file.delete();
+                Log.i(null,"size of uris is "+selectedImageUri.size());
+                System.out.println("hello world");
+                for(Uri uri:selectedImageUri)
+                {
 
-            if (file.exists()){
-                file.setWritable(true, false);
-                String where = MediaStore.Audio.Media.DATA +"=\""+ uri.getPath() +"\"";
-                if (context.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, where, null) == 1){
-                    if (file.exists()){
-                        Boolean d = file.delete();
-                        if(d)
-                        {
-                            Log.i(null,"file deleted success");
-                        }
-                        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+                    Log.i(null,uri.getPath()+" hello there");
+//            file.delete();
+                    String y=getRealPathFromURI(uri);
+                    File file = new File(y);
+                    if (file.exists()) {
+                        ContentResolver contentResolver = getContentResolver();
+                        contentResolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                MediaStore.Images.ImageColumns.DATA + "=?" , new String[]{ y });
+                        Log.i(null,"file deletion success");
                     }
-                    Log.i(null,"file deleted");
+                    else{
+                        Log.i(null,"file does not exists");
+                    }
                 }
             }
-            else{
-                Log.i(null,"file does not exists");
-            }
-        }
+        });
+
+//        System.out.println(selectedImageUri.size());
+
 /////////////////////////////////////
 
 
@@ -567,24 +564,18 @@ public final class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void callBroadCast() {
-        if (Build.VERSION.SDK_INT >= 14) {
-            Log.e("-->", " >= 14");
-            MediaScannerConnection.scanFile(this, new String[]{Environment.getExternalStorageDirectory().toString()}, null, new MediaScannerConnection.OnScanCompletedListener() {
-                /*
-                 *   (non-Javadoc)
-                 * @see android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String, android.net.Uri)
-                 */
-                public void onScanCompleted(String path, Uri uri) {
-                    Log.e("ExternalStorage", "Scanned " + path + ":");
-                    Log.e("ExternalStorage", "-> uri=" + uri);
-                }
-            });
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
         } else {
-            Log.e("-->", " < 14");
-            sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-                    Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
         }
+        return result;
     }
 
     public void getPermissions()
