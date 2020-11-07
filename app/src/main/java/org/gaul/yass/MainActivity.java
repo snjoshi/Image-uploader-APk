@@ -329,11 +329,10 @@ public final class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 //        add selected files to SelectedImageList
-        if(resultCode==RESULT_OK)
-        {
-            Uri uri=data.getData();
-            selectedImageUri.add(uri);
-        }
+//        if(resultCode==RESULT_OK)
+//        {
+//
+//        }
 
 //
 //        if (resultCode == Activity.RESULT_OK)
@@ -362,6 +361,7 @@ public final class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             Log.i("Test", "RESULT_OK");
 
+
 //            Uri myuri=data.getData();
 //          //  Uri uri = data.getData();
 //            Log.i("uri",myuri.toString());
@@ -371,12 +371,13 @@ public final class MainActivity extends AppCompatActivity {
             if (mClipData==null)
             {Log.i("Info", "Single Image Selected");
                 Uri uri = data.getData();
-                String[] projection = { MediaStore.Video.Media.DATA };
-                Cursor cursor = managedQuery(uri, projection, null, null, null);
-                startManagingCursor(cursor);
-                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
-                cursor.moveToFirst();
-                String y=  cursor.getString(column_index);
+//                selectedImageUri.add(uri);
+//                String[] projection = { MediaStore.Video.Media.DATA };
+//                Cursor cursor = managedQuery(uri, projection, null, null, null);
+//                startManagingCursor(cursor);
+//                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+//                cursor.moveToFirst();
+                String y= getRealPathFromURI(uri);
 //                Log.i("Path", cursor.getString(column_index));
 
 
@@ -397,19 +398,19 @@ public final class MainActivity extends AppCompatActivity {
 
 
 
-                String[] projection = { MediaStore.Images.Media.DATA };
-                Cursor cursor = managedQuery(uri, projection, null, null, null);
-                startManagingCursor(cursor);
-                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                cursor.moveToFirst();
-                String y=  cursor.getString(column_index);
-                Log.i("Path", cursor.getString(column_index));
+//                String[] projection = { MediaStore.Images.Media.DATA };
+//                Cursor cursor = managedQuery(uri, projection, null, null, null);
+//                startManagingCursor(cursor);
+//                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+//                cursor.moveToFirst();
+                    String y=getRealPathFromURI(uri);
+//                Log.i("Path", cursor.getString(column_index));
 
 
 
 //                    final String y = uri.getPath().substring(5, uri.getPath().length());
 //                    Log.i("Path", y);
-
+                    Log.i(null,"imagePath "+y);
                     SelectedImageList.add(y);
 
 //
@@ -458,43 +459,60 @@ public final class MainActivity extends AppCompatActivity {
                 dialog.show();
 
                 progress=0;
-                for(final String file:SelectedImageList)
+                Log.i(null,"selectedImageListSizeupdation loop "+SelectedImageList.size());
+                for(final String y:SelectedImageList)
                 {
 
                    // new Thread(new Runnable() {
                       //  public void run(){
-                            new UploadFilesTask().execute(path,file);
 
+                    Log.i(null,"imagepath "+y+" uploading");
+                    new UploadFilesTask().execute(path,y);
+                    Log.i(null,"progress value "+progress);
                     //delete all the selected files
 
                        // }
                    // }).start();
 
                 }
-                Log.i(null,"size of uris is "+selectedImageUri.size());
-                System.out.println("hello world");
-                for(Uri uri:selectedImageUri)
+                Log.i(null,"in deleting loop "+SelectedImageList.size());
+                while(progress<=SelectedImageList.size())
                 {
-
-                    Log.i(null,uri.getPath()+" hello there");
-//                  file.delete();
-                    String y=getRealPathFromURI(uri);
-                    File file = new File(y);
-                    if (file.exists()) {
-                        ContentResolver contentResolver = getContentResolver();
-                        contentResolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                MediaStore.Images.ImageColumns.DATA + "=?" , new String[]{ y });
-                        if(!file.exists())
-                            Log.i(null,"file deletion success");
-                        else{
-                            file.delete();
-                            Log.i(null,"file could not be deleted");
-                        }
+                    if(progress<SelectedImageList.size())
+                    {
+                        continue;
                     }
-                    else{
-                        Log.i(null,"file does not exists");
+                    else if(progress==SelectedImageList.size()) {
+                        for (String y : SelectedImageList) {
+                            File file = new File(y);
+                            Log.i(null, "image " + y + " deleting");
+                            if (file.exists()) {
+                                file.delete();
+                                ContentResolver contentResolver = getContentResolver();
+                                contentResolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                        MediaStore.Images.ImageColumns.DATA + "=?", new String[]{y});
+                                if (!file.exists()) {
+                                    Log.i(null, "file deletion success");
+                                } else {
+                                    Log.i(null, "file could not be deleted");
+                                }
+                            } else {
+                                Log.i(null, "file does not exists");
+                            }
+                        }
+                        break;
                     }
                 }
+//                Log.i(null,"size of uris is "+selectedImageUri.size());
+//                System.out.println("hello world");
+//                for(Uri uri:selectedImageUri)
+//                {
+//
+//                    Log.i(null,uri.getPath()+" hello there");
+////                  file.delete();
+//                    String y=getRealPathFromURI(uri);
+//
+//                }
             }
         });
 
@@ -562,7 +580,7 @@ public final class MainActivity extends AppCompatActivity {
 //                {
 //                    Log.i("Path",path);
 //                }
-            Log.i("Result", "MULTIPLE IMAGES SELECRED");
+//            Log.i("Result", "MULTIPLE IMAGES SELECRED");
 //                Log.i("Result", x);
 //        }
 
