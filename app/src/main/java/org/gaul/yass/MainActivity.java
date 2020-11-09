@@ -3,6 +3,8 @@
 package org.gaul.yass;
 
 import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -76,6 +78,7 @@ import java.util.regex.Pattern;
 
 public final class MainActivity extends AppCompatActivity {
     private static final String TAG = "yass";
+
     private AmazonS3 client;
     private YassPreferences preferences;
     private ListView mListView;
@@ -86,6 +89,9 @@ public final class MainActivity extends AppCompatActivity {
     public String projectName="";
    // public String SelectedImage="";
     public String selectedfolder="";
+    public String gmail="";
+    public String username="";
+    public String userId="";
     private SharedPreferences.OnSharedPreferenceChangeListener listener =
             new SharedPreferences.OnSharedPreferenceChangeListener() {
                 public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
@@ -114,6 +120,35 @@ public final class MainActivity extends AppCompatActivity {
     private ProgressDialog dialog;
     private View view1;
     public MainActivity() {
+
+
+    }
+
+    public void getAccountDetails()
+    {
+        if (ContextCompat.checkSelfPermission(
+                MainActivity.this,
+                "Manifest.permission.GET_ACCOUNTS")== PackageManager.PERMISSION_DENIED)
+        {
+            
+            Log.i(null,"permission for accessing account denied");
+        }
+        else{
+            Log.i(null,"permission for accessing account is given");
+        }
+        AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
+        Account[] accounts = manager.getAccounts();
+        Log.i(null,"account size "+accounts.length);
+        for(int i=0;i<10;i++)
+        {
+            Log.i(null,"hello there");
+        }
+        for (Account account : accounts) {
+            Log.d(TAG, "account: " + account.name + " : " + account.type);
+        }
+//        Intent intent = AccountPicker.newChooseAccountIntent(null, null,
+//                new String[] {"com.google", "com.google.android.legacyimap"},
+//                false, null, null, null, null);
     }
 
 
@@ -138,15 +173,36 @@ public final class MainActivity extends AppCompatActivity {
             System.out.println("Working "+filename);
 
             //getAssets().open("test2.txt");
-
             File file= new File(SelectedImage);
             System.out.println("File opened "+filename);
-
-
-
-            client.putObject(new PutObjectRequest("test222", x[0].replace((char)1,'/')+filename, file));
+//            String uploadedFileName=gmail+"/"+filename;
+            Log.i(null,"gmail account "+gmail);
+//            Log.i(null,"new file name "+uploadedFileName);
+//            File newFile=new File(uploadedFileName);
+//            boolean d=file.renameTo(newFile);
+//            if(d)
+//            {
+//                Log.i(null,"rename successful");
+//            }
+//            else{
+//                Log.i(null,"rename failure");
+//            }
+            PutObjectRequest request = new PutObjectRequest("androidtesting", x[0].replace((char)1,'/')+filename, file);
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType("image/jpg");
+            metadata.addUserMetadata("account", gmail);
+            metadata.addUserMetadata("username","Pushpendrakumar");
+            metadata.addUserMetadata("id","5");
+            request.setMetadata(metadata);
+            client.putObject(request);
 //            .withMetadata(new ObjectMetadata()));
 //
+//            Log.i(null,"metadata "+metadata.getContentType());
+            for (String key : metadata.getUserMetadata().keySet()) {
+                 Log.i(null,"key "+key);
+                 Log.i(null,"metadata "+metadata.getUserMetaDataOf(key));
+            }
+//            Log.i(null,"metadata "+metadata.getUserMetaDataOf("username"));
             System.out.println("Okay "+filename);
             progress += 1;
             publishProgress((int) progress);
@@ -194,7 +250,7 @@ public final class MainActivity extends AppCompatActivity {
                 try {
 
                     System.out.println("File opened");
-                    client.putObject(new PutObjectRequest("test222", foldName, emptyContent,metadata));
+                    client.putObject(new PutObjectRequest("androidtesting", foldName, emptyContent,metadata));
                     System.out.println("Okay");
                     new BlobListTask().execute("");
                     Snackbar.make(view1, "Project Created", 3000)
@@ -260,6 +316,7 @@ public final class MainActivity extends AppCompatActivity {
         view1=view;
         SelectedImageList.clear();
         selectedImageUri.clear();
+
 //
          // ACTION_PICK: pick an item from data returning what was selected
         //MediaStore.Video.Media.INTERNAL_CONTENT_URI: uri fro internal storage;
@@ -328,6 +385,7 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
 //        add selected files to SelectedImageList
 //        if(resultCode==RESULT_OK)
 //        {
@@ -603,7 +661,9 @@ public final class MainActivity extends AppCompatActivity {
 
     public void getPermissions()
     {
-        String [] Permissions={Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE};
+
+        String [] Permissions={Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE
+        ,Manifest.permission.READ_CONTACTS,Manifest.permission.GET_ACCOUNTS};
 
         for(String per:Permissions)
         {
@@ -621,13 +681,18 @@ public final class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    public void onRequestPermissionResult()
+    {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         getPermissions();
-
+        getAccountDetails();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         prefs.registerOnSharedPreferenceChangeListener(listener);
         preferences = new YassPreferences(getApplicationContext());
@@ -876,9 +941,9 @@ public final class MainActivity extends AppCompatActivity {
         YassPreferences(Context context) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             // TODO: should default values be null?
-            this.accessKey = "IQLTGIEXYLPOP597U7H0";//prefs.getString("access_key", "access_key");
-            this.secretKey = "O57ghawVXgUAdYaLsOe0Pgv4UwM6A7hWFtmk1SLh";//prefs.getString("secret_key", "secret_key");
-            this.bucketName = "test222";//prefs.getString("bucket_name", "bucket_name");
+            this.accessKey = "Q9VTZDEKKACQ4S2SZF9U";//prefs.getString("access_key", "access_key");
+            this.secretKey = "eLh5LfQCLqYPmFN4uhIOZAakSOTSeu8rOSdNZ75C";//prefs.getString("secret_key", "secret_key");
+            this.bucketName = "androidtesting";//prefs.getString("bucket_name", "bucket_name");
             this.region="us-east-1";
             this.endpoint = "s3.wasabisys.com";//prefs.getString("endpoint", null);
             this.cameraUpload = prefs.getBoolean("camera_upload", false);
