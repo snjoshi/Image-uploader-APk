@@ -3,9 +3,6 @@
 package org.gaul.yass;
 
 import android.Manifest;
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -17,13 +14,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
@@ -41,6 +35,7 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -59,15 +54,11 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -89,10 +80,11 @@ public final class MainActivity extends AppCompatActivity {
     public String projectName="";
    // public String SelectedImage="";
     public String selectedfolder="";
-    public String gmail="";
-    public String username="";
-    public String userId="";
-    private SharedPreferences.OnSharedPreferenceChangeListener listener =
+    SharedPreferences sharedpreferences;
+    public String Email="";
+    public String Name="";
+    public String Phone="";
+    private final SharedPreferences.OnSharedPreferenceChangeListener listener =
             new SharedPreferences.OnSharedPreferenceChangeListener() {
                 public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
                     MainActivity.this.preferences = new YassPreferences(getApplicationContext());
@@ -101,8 +93,8 @@ public final class MainActivity extends AppCompatActivity {
             };
 
     //String [] SelectedImageList;
-    private static List<String> SelectedImageList = new ArrayList<String>();
-    private static List<Uri> selectedImageUri = new ArrayList<>();
+    private static final List<String> SelectedImageList = new ArrayList<String>();
+    private static final List<Uri> selectedImageUri = new ArrayList<>();
 
     private final int PICK_IMAGE_MULTIPLE =20;
 
@@ -124,32 +116,34 @@ public final class MainActivity extends AppCompatActivity {
 
     }
 
-    public void getAccountDetails()
-    {
-        if (ContextCompat.checkSelfPermission(
-                MainActivity.this,
-                "Manifest.permission.GET_ACCOUNTS")== PackageManager.PERMISSION_DENIED)
-        {
-            
-            Log.i(null,"permission for accessing account denied");
-        }
-        else{
-            Log.i(null,"permission for accessing account is given");
-        }
-        AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
-        Account[] accounts = manager.getAccounts();
-        Log.i(null,"account size "+accounts.length);
-        for(int i=0;i<10;i++)
-        {
-            Log.i(null,"hello there");
-        }
-        for (Account account : accounts) {
-            Log.d(TAG, "account: " + account.name + " : " + account.type);
-        }
-//        Intent intent = AccountPicker.newChooseAccountIntent(null, null,
-//                new String[] {"com.google", "com.google.android.legacyimap"},
-//                false, null, null, null, null);
-    }
+//    public void getAccountDetails()
+//    {
+//        final int PERMS_REQUEST_CODE = 1;
+//        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.GET_ACCOUNTS)) {
+//                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.GET_ACCOUNTS}, PERMS_REQUEST_CODE);
+//            } else {
+//                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.GET_ACCOUNTS}, PERMS_REQUEST_CODE);
+//            }
+//        }
+////        else {
+//            ArrayList<String> emails = new ArrayList<>();
+//            Pattern gmailPattern = Patterns.EMAIL_ADDRESS;
+//            Account[] accounts = AccountManager.get(this).getAccounts();
+//            Log.i(null, "account size " + accounts.length);
+//            for (Account account : accounts) {
+//                if (gmailPattern.matcher(account.name).matches()) {
+//                    emails.add(account.name);
+//                }
+//            }
+//            Log.i(null,"emails size "+emails.size());
+////        }
+//
+////        for (Account account : accounts) {
+////            Log.d(TAG, "account: " + account.name + " : " + account.type);
+////        }
+//
+//    }
 
 
     private class UploadFilesTask extends AsyncTask<String, Integer, Long> {
@@ -176,7 +170,7 @@ public final class MainActivity extends AppCompatActivity {
             File file= new File(SelectedImage);
             System.out.println("File opened "+filename);
 //            String uploadedFileName=gmail+"/"+filename;
-            Log.i(null,"gmail account "+gmail);
+            Log.i(null,"gmail account "+Email);
 //            Log.i(null,"new file name "+uploadedFileName);
 //            File newFile=new File(uploadedFileName);
 //            boolean d=file.renameTo(newFile);
@@ -190,7 +184,7 @@ public final class MainActivity extends AppCompatActivity {
             PutObjectRequest request = new PutObjectRequest("androidtesting", x[0].replace((char)1,'/')+filename, file);
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType("image/jpg");
-            metadata.addUserMetadata("account", gmail);
+            metadata.addUserMetadata("account", Email);
             metadata.addUserMetadata("username","Pushpendrakumar");
             metadata.addUserMetadata("id","5");
             request.setMetadata(metadata);
@@ -315,7 +309,7 @@ public final class MainActivity extends AppCompatActivity {
 //        startActivityForResult(Intent.createChooser(intent,"Select Picture"), 1);
         view1=view;
         SelectedImageList.clear();
-        selectedImageUri.clear();
+//        selectedImageUri.clear();
 
 //
          // ACTION_PICK: pick an item from data returning what was selected
@@ -663,7 +657,7 @@ public final class MainActivity extends AppCompatActivity {
     {
 
         String [] Permissions={Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE
-        ,Manifest.permission.READ_CONTACTS,Manifest.permission.GET_ACCOUNTS};
+        };
 
         for(String per:Permissions)
         {
@@ -679,22 +673,22 @@ public final class MainActivity extends AppCompatActivity {
                                 1);
             }
         }
-
     }
 
-    public void onRequestPermissionResult()
-    {
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        setContentView(R.xml.user_info);
+//        storeUserDetails();
+//        setContentView(R.layout.activity_login);
+
         setContentView(R.layout.activity_main);
         getPermissions();
-        getAccountDetails();
+//        getAccountDetails();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        prefs.registerOnSharedPreferenceChangeListener(listener);
+        prefs.registerOnSharedPreferenceChangeListener
+                (listener);
         preferences = new YassPreferences(getApplicationContext());
         // TODO: if prefs not set, show settings
 
@@ -703,22 +697,20 @@ public final class MainActivity extends AppCompatActivity {
         this.mListView = (ListView) findViewById(R.id.blob_list_view);
         this.adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listItems);
         mListView.setAdapter(adapter);
-//        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long arg3) {
-//                String path = prefix + listItems.get(position);
-//                if (listing.getCommonPrefixes().contains(path)) {
-//                    MainActivity.this.prefix = path;
-//                    new BlobListTask().execute(path);
-//                } else {
-//                    new SelectBlobTask().execute(path);
-//                }
-//            }
-//        });
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long arg3) {
+                String path = prefix + listItems.get(position);
+                if (listing.getCommonPrefixes().contains(path)) {
+                    MainActivity.this.prefix = path;
+                    new BlobListTask().execute(path);
+                } else {
+                    new SelectBlobTask().execute(path);
+                }
+            }
+        });
         // TODO: long press
         new BlobListTask().execute("");
-
-
     }
 
     @Override

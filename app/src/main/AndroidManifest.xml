@@ -2,35 +2,49 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.gaul.yass">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"
+        android:maxSdkVersion="22" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
     <uses-permission-sdk-23 android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"></uses-permission>
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"></uses-permission>
+
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_sync"
         android:label="@string/app_header"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".LogIn"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SignUp"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
 
-        <receiver android:name=".YassBroadcastReceiver" >
-            <intent-filter android:priority="10000" >
-                <action android:name="com.android.camera.NEW_PICTURE"/>
-                <data android:mimeType="image/*"/>
+        </activity>
+        <activity android:name=".MainActivity">
+
+        </activity>
+
+        <receiver android:name=".YassBroadcastReceiver">
+            <intent-filter android:priority="10000">
+                <action android:name="com.android.camera.NEW_PICTURE" />
+
+                <data android:mimeType="image/*" />
             </intent-filter>
-            <intent-filter android:priority="10000" >
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+            <intent-filter android:priority="10000">
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
@@ -46,7 +60,7 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings" />
     </application>
 
 </manifest>

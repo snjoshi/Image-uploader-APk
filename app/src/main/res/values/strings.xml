@@ -20,4 +20,14 @@
     <string name="pref_camera_upload_only_on_wifi">&#8230;only on Wifi</string>
     <string name="pref_camera_upload_summary_only_on_wifi">Only upload new photos when using Wifi</string>
 
+    <string name="forgotPassword"><u>forgot password?</u></string>
+    <string name="login">Login</string>
+    <string name="loginhere">loginhere</string>
+    <string name="signup">signup</string>
+    <string name="password">password</string>
+    <string name="username">username</string>
+    <string name="email">email</string>
+    <string name="fullname">fullname</string>
+    <string name="signuphere">signuphere</string>
+
 </resources>
