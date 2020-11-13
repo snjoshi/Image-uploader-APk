@@ -170,7 +170,7 @@ public final class MainActivity extends AppCompatActivity {
             File file= new File(SelectedImage);
             System.out.println("File opened "+filename);
 //            String uploadedFileName=gmail+"/"+filename;
-            Log.i(null,"gmail account "+Email);
+//            Log.i(null,"gmail account "+Email);
 //            Log.i(null,"new file name "+uploadedFileName);
 //            File newFile=new File(uploadedFileName);
 //            boolean d=file.renameTo(newFile);
@@ -181,21 +181,29 @@ public final class MainActivity extends AppCompatActivity {
 //            else{
 //                Log.i(null,"rename failure");
 //            }
+
+            SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String username = sharedPreferences.getString("username","");
+            String email = sharedPreferences.getString("email","");
+            String fullname = sharedPreferences.getString("fullname","");
+            Log.i(null,username);
+            Log.i(null,email);
+            Log.i(null,fullname);
             PutObjectRequest request = new PutObjectRequest("androidtesting", x[0].replace((char)1,'/')+filename, file);
             ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType("image/jpg");
-            metadata.addUserMetadata("account", Email);
-            metadata.addUserMetadata("username","Pushpendrakumar");
-            metadata.addUserMetadata("id","5");
+            metadata.setContentType("image/*");
+            metadata.addUserMetadata("email", email);
+            metadata.addUserMetadata("username", username);
+            metadata.addUserMetadata("fullname",fullname);
             request.setMetadata(metadata);
             client.putObject(request);
 //            .withMetadata(new ObjectMetadata()));
 //
 //            Log.i(null,"metadata "+metadata.getContentType());
-            for (String key : metadata.getUserMetadata().keySet()) {
-                 Log.i(null,"key "+key);
-                 Log.i(null,"metadata "+metadata.getUserMetaDataOf(key));
-            }
+//            for (String key : metadata.getUserMetadata().keySet()) {
+//                 Log.i(null,"key "+key);
+//                 Log.i(null,"metadata "+metadata.getUserMetaDataOf(key));
+//            }
 //            Log.i(null,"metadata "+metadata.getUserMetaDataOf("username"));
             System.out.println("Okay "+filename);
             progress += 1;
@@ -309,7 +317,7 @@ public final class MainActivity extends AppCompatActivity {
 //        startActivityForResult(Intent.createChooser(intent,"Select Picture"), 1);
         view1=view;
         SelectedImageList.clear();
-//        selectedImageUri.clear();
+        selectedImageUri.clear();
 
 //
          // ACTION_PICK: pick an item from data returning what was selected
@@ -679,13 +687,9 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.xml.user_info);
-//        storeUserDetails();
-//        setContentView(R.layout.activity_login);
 
         setContentView(R.layout.activity_main);
         getPermissions();
-//        getAccountDetails();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         prefs.registerOnSharedPreferenceChangeListener
                 (listener);

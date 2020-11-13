@@ -1,8 +1,10 @@
 package org.gaul.yass;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,11 +17,16 @@ import android.widget.Toast;
 
 public class SignUp extends AppCompatActivity {
 
-    TextInputEditText textInputEditTextFullName,textInputEditTextUsername,textInputEditTextPassword,
+    private TextInputEditText textInputEditTextFullName,textInputEditTextUsername,textInputEditTextPassword,
             textInputEditTextEmail;
-    Button buttonSignUp;
-    TextView textViewLogIn;
-    ProgressBar progressBar;
+    private Button buttonSignUp;
+    private TextView textViewLogIn;
+    private ProgressBar progressBar;
+    public  static final String SHARED_PREFS ="sharedPrefs";
+    public static final String EMAIL="email";
+    public static final String USERNAME="username";
+    public static final String FULLNAME="fullname";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,11 +56,13 @@ public class SignUp extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.i(null,"hello there");
+
                 fullname=String.valueOf(textInputEditTextFullName.getText());
                 email=String.valueOf(textInputEditTextEmail.getText());
                 password=String.valueOf(textInputEditTextPassword.getText());
                 username=String.valueOf(textInputEditTextUsername.getText());
                 Log.i(null,fullname+email+password+username);
+                saveData(fullname,email,username);
                 if(fullname==null||email==null||password==null||username==null)
                 {
                     Log.i(null,"got null");
@@ -106,9 +115,20 @@ public class SignUp extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"all details required",
                             Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
         //Start ProgressBar first (Set visibility VISIBLE)
         //Start ProgressBar first (Set visibility VISIBLE)
     }
+
+    public void saveData(String fullname,String email,String username) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor=sharedPreferences.edit();
+        editor.putString(USERNAME,username);
+        editor.putString(EMAIL,email);
+        editor.putString(FULLNAME,fullname);
+        editor.apply();
+    }
+
 }
