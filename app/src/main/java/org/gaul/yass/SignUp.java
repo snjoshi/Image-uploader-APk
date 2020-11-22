@@ -26,11 +26,13 @@ public class SignUp extends AppCompatActivity {
     public static final String EMAIL="email";
     public static final String USERNAME="username";
     public static final String FULLNAME="fullname";
-
+    public static final String PASSWORD="password";
+    SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+        sharedPreferences=PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         progressBar = findViewById(R.id.progress);
         textInputEditTextUsername = findViewById(R.id.username);
         textInputEditTextEmail = findViewById(R.id.email);
@@ -55,18 +57,21 @@ public class SignUp extends AppCompatActivity {
             String fullname=null,email=null,password=null,username=null;
             @Override
             public void onClick(View v) {
+                if(sharedPreferences.getString("username","").equals("")==false)
+                {
+                    String temp="your device is already registered!";
+                    Toast.makeText(getApplicationContext(),temp,Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Log.i(null,"hello there");
-
-                fullname=String.valueOf(textInputEditTextFullName.getText());
-                email=String.valueOf(textInputEditTextEmail.getText());
-                password=String.valueOf(textInputEditTextPassword.getText());
-                username=String.valueOf(textInputEditTextUsername.getText());
-                Log.i(null,fullname+email+password+username);
-                saveData(fullname,email,username);
                 if(fullname==null||email==null||password==null||username==null)
                 {
                     Log.i(null,"got null");
                 }
+                fullname=String.valueOf(textInputEditTextFullName.getText());
+                email=String.valueOf(textInputEditTextEmail.getText());
+                password=String.valueOf(textInputEditTextPassword.getText());
+                username=String.valueOf(textInputEditTextUsername.getText());
                 if(fullname.length()>0&&email.length()>0&&password.length()>0&&
                         username.length()>0) {
                     Log.i(null,"hi there");
@@ -88,20 +93,24 @@ public class SignUp extends AppCompatActivity {
                             data[1] = username;
                             data[2]= password;
                             data[3]=email;
-                            PutData putData = new PutData("http://192.168.43.220/LoginRegister/signup.php", "POST", field, data);
+                            PutData putData = new PutData("https://www.byteseq.com/apkphp/signup.php", "POST", field, data);
                             if (putData.startPut()) {
                                 if (putData.onComplete()) {
                                     progressBar.setVisibility(View.GONE);
                                     String result = putData.getResult();
                                     if(result.equals("Sign Up Success"))
                                     {
+//                                      Log.i(null,fullname+email+password+username);
+                                        saveData(fullname,email,username,password);
                                         Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
                                         Intent intent=new Intent(getApplicationContext(),LogIn.class);
                                         startActivity(intent);
                                         finish();
                                     }
                                     else{
-                                        Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
+                                        result="account with this username or email already exists! " +
+                                                "Email and Username must be unique";
+                                        Toast.makeText(getApplicationContext(),result,Toast.LENGTH_LONG).show();
                                     }
                                     //End ProgressBar (Set visibility to GONE)
                                     Log.i("PutData", result);
@@ -112,7 +121,7 @@ public class SignUp extends AppCompatActivity {
                     });
                 }
                 else{
-                    Toast.makeText(getApplicationContext(),"all details required",
+                    Toast.makeText(getApplicationContext(),"please fill all details",
                             Toast.LENGTH_SHORT).show();
                 }
 
@@ -122,12 +131,13 @@ public class SignUp extends AppCompatActivity {
         //Start ProgressBar first (Set visibility VISIBLE)
     }
 
-    public void saveData(String fullname,String email,String username) {
+    public void saveData(String fullname,String email,String username,String password) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor=sharedPreferences.edit();
         editor.putString(USERNAME,username);
         editor.putString(EMAIL,email);
         editor.putString(FULLNAME,fullname);
+        editor.putString(PASSWORD,password);
         editor.apply();
     }
 

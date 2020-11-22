@@ -22,12 +22,12 @@
 
     <string name="forgotPassword"><u>forgot password?</u></string>
     <string name="login">Login</string>
-    <string name="loginhere">loginhere</string>
+    <string name="loginhere"><u>loginhere</u></string>
     <string name="signup">signup</string>
     <string name="password">password</string>
     <string name="username">username</string>
     <string name="email">email</string>
     <string name="fullname">fullname</string>
-    <string name="signuphere">signuphere</string>
+    <string name="signuphere"><u>signuphere</u></string>
 
 </resources>

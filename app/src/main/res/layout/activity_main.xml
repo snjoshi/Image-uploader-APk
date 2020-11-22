@@ -21,6 +21,8 @@
         android:layout_height="1dp"
         android:layout_alignParentTop="true"
         android:layout_weight="1"
+        android:background="@color/white"
+
         ></ListView>
 
     <Button
@@ -30,6 +32,8 @@
         android:layout_below="@id/blob_list_view"
         android:layout_alignParentRight="true"
         android:onClick="uploadimage"
+        android:layout_marginBottom="8dp"
+        android:background="#c9d6df"
         android:text="Upload" />
 
     <Button
@@ -39,6 +43,8 @@
         android:layout_below="@id/blob_list_view"
         android:layout_alignParentLeft="true"
         android:onClick="createProject"
+        android:background="#c9d6df"
+
         android:text="Create Project" />
 
 

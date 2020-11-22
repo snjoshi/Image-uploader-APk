@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
@@ -39,6 +40,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazonaws.AmazonClientException;
@@ -74,7 +76,8 @@ public final class MainActivity extends AppCompatActivity {
     private YassPreferences preferences;
     private ListView mListView;
     private final List<String> listItems = new ArrayList<String>();
-    private ArrayAdapter<String> adapter;
+//    private ArrayAdapter<String> adapter;
+    private ListViewAdapter adapter;
     private String prefix = "";
     private ObjectListing listing;
     public String projectName="";
@@ -174,7 +177,6 @@ public final class MainActivity extends AppCompatActivity {
 //            Log.i(null,"new file name "+uploadedFileName);
 //            File newFile=new File(uploadedFileName);
 //            boolean d=file.renameTo(newFile);
-//            if(d)
 //            {
 //                Log.i(null,"rename successful");
 //            }
@@ -429,7 +431,8 @@ public final class MainActivity extends AppCompatActivity {
             /////////////////////////////////
             ClipData mClipData = data.getClipData();
             if (mClipData==null)
-            {Log.i("Info", "Single Image Selected");
+            {
+                Log.i("Info", "Single Image Selected");
                 Uri uri = data.getData();
 //                selectedImageUri.add(uri);
 //                String[] projection = { MediaStore.Video.Media.DATA };
@@ -487,12 +490,15 @@ public final class MainActivity extends AppCompatActivity {
                 Snackbar.make(view1, "Select project", 3000)
                         .setAction("Action", null).show();
 
-            this.mListView = (ListView) findViewById(R.id.blob_list_view);
-            this.adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listItems);
-            mListView.setAdapter(adapter);
+
+
+//            this.mListView = (ListView) findViewById(R.id.blob_list_view);
+//            this.adapter = new ListViewAdapter(this,listItems);
+//            mListView.setAdapter(adapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long arg3) {
+//                blinkTextView();
                 final String path = prefix + listItems.get(position);
 //                if (listing.getCommonPrefixes().contains(path)) {
 //                    MainActivity.this.prefix = path;
@@ -500,15 +506,33 @@ public final class MainActivity extends AppCompatActivity {
 //                } else {
 //                    new SelectBlobTask().execute(path);
 //                }
-                mListView.setOnItemClickListener(null);
+//                Toast.makeText(getApplicationContext(),"selected folder "+path,Toast.LENGTH_LONG).show();
                 Log.i("SELECTED FOLDER",path);
+//                Log.i("temp","hi");
+                progress=0;
+                for(final String y:SelectedImageList)
+                {
 
+                    // new Thread(new Runnable() {
+                    //  public void run(){
+
+                    Log.i(null,"imagepath "+y+" uploading");
+                    new UploadFilesTask().execute(path,y);
+                    Log.i(null,"progress value "+progress);
+                    //delete all the selected files
+
+                    // }
+                    // }).start();
+
+                }
+                mListView.setOnItemClickListener(null);
                 dialog = new ProgressDialog(MainActivity.this);
 
                 long contentLength = SelectedImageList.size();
                 dialog.setMax((int) contentLength);
                 dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 dialog.setMessage("Uploading...");
+
                 // TODO: use human-friendly units via setProgressNumberFormat
                 dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
@@ -518,23 +542,9 @@ public final class MainActivity extends AppCompatActivity {
                 });
                 dialog.show();
 
-                progress=0;
+
                 Log.i(null,"selectedImageListSizeupdation loop "+SelectedImageList.size());
-                for(final String y:SelectedImageList)
-                {
 
-                   // new Thread(new Runnable() {
-                      //  public void run(){
-
-                    Log.i(null,"imagepath "+y+" uploading");
-                    new UploadFilesTask().execute(path,y);
-                    Log.i(null,"progress value "+progress);
-                    //delete all the selected files
-
-                       // }
-                   // }).start();
-
-                }
                 Log.i(null,"in deleting loop "+SelectedImageList.size());
                 while(progress<=SelectedImageList.size())
                 {
@@ -543,6 +553,7 @@ public final class MainActivity extends AppCompatActivity {
                         continue;
                     }
                     else if(progress==SelectedImageList.size()) {
+                        Toast.makeText(MainActivity.this, "Images upload successful", Toast.LENGTH_SHORT).show();
                         for (String y : SelectedImageList) {
                             File file = new File(y);
                             Log.i(null, "image " + y + " deleting");
@@ -647,6 +658,29 @@ public final class MainActivity extends AppCompatActivity {
         }
     }
 
+//    private void blinkTextView() {
+//        final Handler handler = new Handler();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                int timeToBlink = 1000;
+//                try{Thread.sleep(timeToBlink);}catch (Exception e) {}
+//                handler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        TextView txt = findViewById(R.id.text);
+//                        if(txt.getVisibility() == View.VISIBLE) {
+//                            txt.setVisibility(View.INVISIBLE);
+//                        } else {
+//                            txt.setVisibility(View.VISIBLE);
+//                        }
+//                        blinkTextView();
+//                    }
+//                });
+//            }
+//        }).start();
+//    }
+
     private String getRealPathFromURI(Uri contentURI) {
         String result;
         Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
@@ -690,6 +724,7 @@ public final class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         getPermissions();
+        Log.i(null,"hello there are you");
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         prefs.registerOnSharedPreferenceChangeListener
                 (listener);
@@ -698,23 +733,30 @@ public final class MainActivity extends AppCompatActivity {
 
         client = getS3Client(preferences);
 
-        this.mListView = (ListView) findViewById(R.id.blob_list_view);
-        this.adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listItems);
-        mListView.setAdapter(adapter);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long arg3) {
-                String path = prefix + listItems.get(position);
-                if (listing.getCommonPrefixes().contains(path)) {
-                    MainActivity.this.prefix = path;
-                    new BlobListTask().execute(path);
-                } else {
-                    new SelectBlobTask().execute(path);
-                }
-            }
-        });
+//        this.mListView = (ListView) findViewById(R.id.blob_list_view);
+//        this.adapter = new ListViewAdapter(this,listItems);
+
+//        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long arg3) {
+//                Toast.makeText(getApplicationContext(),"hello",Toast.LENGTH_SHORT).show();
+//                String path = prefix + listItems.get(position);
+//                if (listing.getCommonPrefixes().contains(path)) {
+//                    MainActivity.this.prefix = path;
+//                    new BlobListTask().execute(path);
+//                } else {
+//                    new SelectBlobTask().execute(path);
+//                }
+//            }
+//        });
+//        mListView.setAdapter(adapter);
+        System.out.println("hello");
         // TODO: long press
         new BlobListTask().execute("");
+//        this.mListView = (ListView) findViewById(R.id.blob_list_view);
+//        this.adapter = new ListViewAdapter(this,this.listItems);
+//        mListView.setAdapter(adapter);
+        Log.i(null,"size "+listItems.size());
     }
 
     @Override
@@ -727,6 +769,7 @@ public final class MainActivity extends AppCompatActivity {
         prefix = prefix.substring(0, index + 1);
         Log.i(TAG, "Changing prefix to: " + prefix);
         new BlobListTask().execute(prefix);
+
     }
 
     @Override
@@ -757,9 +800,10 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private class BlobListTask extends AsyncTask<String, Void, Collection<String>> {
+        List<String> listItems = new ArrayList<>();
         @Override
         public Collection<String> doInBackground(String... path) {
-            List<String> listItems = new ArrayList<>();
+
             String prefix = path[0];
             try {
                 MainActivity.this.listing = client.listObjects(new ListObjectsRequest()
@@ -798,6 +842,9 @@ public final class MainActivity extends AppCompatActivity {
             }
             MainActivity.this.listItems.clear();
             MainActivity.this.listItems.addAll(listItems);
+            mListView = (ListView) findViewById(R.id.blob_list_view);
+            adapter=new ListViewAdapter(getApplicationContext(), MainActivity.this.listItems);
+            mListView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         }
     }

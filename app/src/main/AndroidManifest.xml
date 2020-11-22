@@ -19,8 +19,8 @@
         android:icon="@drawable/ic_sync"
         android:label="@string/app_header"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
         <activity android:name=".LogIn"
             android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
@@ -33,7 +33,8 @@
             android:theme="@style/Theme.Design.Light.NoActionBar">
 
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            >
 
         </activity>
 

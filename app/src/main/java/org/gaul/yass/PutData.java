@@ -1,5 +1,8 @@
 package org.gaul.yass;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -55,6 +58,11 @@ public class PutData extends Thread {
             inputStream.close();
             httpURLConnection.disconnect();
             setData(result.toString());
+        }
+        catch(java.net.ConnectException ex)
+        {
+            Log.i(null,"connection error");
+            setData("slow internet connection");
         } catch (IOException e) {
             setData(e.toString());
         }

@@ -1,8 +1,10 @@
 package org.gaul.yass;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,20 +15,34 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.ConnectException;
+
 public class LogIn extends AppCompatActivity {
     TextInputEditText textInputEditTextUsername,textInputEditTextPassword;
     Button buttonLogIn;
     TextView textViewSignUp;
     ProgressBar progressBar;
+    SharedPreferences sharedpreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedpreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         setContentView(R.layout.activity_log_in);
         textInputEditTextUsername = findViewById(R.id.username);
         textInputEditTextPassword = findViewById(R.id.password);
         buttonLogIn=findViewById(R.id.buttonLogin);
         textViewSignUp=findViewById(R.id.signUpText);
         progressBar= findViewById(R.id.progress);
+        String password,username;
+        username=sharedpreferences.getString("username","");
+        password=sharedpreferences.getString("password","");
+        Log.i("username",username);
+        Log.i("password",password);
+        if(username.length()>0||password.length()>0)
+        {
+            textInputEditTextUsername.setText(username);
+            textInputEditTextPassword.setText(password);
+        }
         textViewSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,7 +77,7 @@ public class LogIn extends AppCompatActivity {
                             String[] data = new String[2];
                             data[0] = username;
                             data[1]= password;
-                            PutData putData = new PutData("http://192.168.43.220/LoginRegister/login.php", "POST", field, data);
+                            PutData putData = new PutData("https://www.byteseq.com/apkphp/login.php", "POST", field, data);
                             if (putData.startPut()) {
                                 if (putData.onComplete()) {
                                     progressBar.setVisibility(View.GONE);
