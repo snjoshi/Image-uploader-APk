@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,14 @@ public class ListViewAdapter extends ArrayAdapter {
             listItemView = LayoutInflater.from(getContext()).inflate(R.layout.list_item,parent,false);
         }
         String curr=getItem(position).toString();
-        Button currItem=(Button)listItemView.findViewById(R.id.item);
+        TextView currItem=(TextView) listItemView.findViewById(R.id.item);
+//        currItem.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
+//        currItem.setFocusable(false);
         currItem.setText(curr);
         return listItemView;
     }

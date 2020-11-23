@@ -506,7 +506,8 @@ public final class MainActivity extends AppCompatActivity {
 //                } else {
 //                    new SelectBlobTask().execute(path);
 //                }
-//                Toast.makeText(getApplicationContext(),"selected folder "+path,Toast.LENGTH_LONG).show();
+//                Snackbar.make(view1, "Selected folder "+path, 1500)
+//                        .setAction("Action", null).show();
                 Log.i("SELECTED FOLDER",path);
 //                Log.i("temp","hi");
                 progress=0;
@@ -553,7 +554,7 @@ public final class MainActivity extends AppCompatActivity {
                         continue;
                     }
                     else if(progress==SelectedImageList.size()) {
-                        Toast.makeText(MainActivity.this, "Images upload successful", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Images upload successful to "+path, Toast.LENGTH_SHORT).show();
                         for (String y : SelectedImageList) {
                             File file = new File(y);
                             Log.i(null, "image " + y + " deleting");
@@ -724,7 +725,7 @@ public final class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         getPermissions();
-        Log.i(null,"hello there are you");
+//        Log.i(null,"hello there are you");
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         prefs.registerOnSharedPreferenceChangeListener
                 (listener);
@@ -841,11 +842,12 @@ public final class MainActivity extends AppCompatActivity {
                 return;
             }
             MainActivity.this.listItems.clear();
+            Log.i("inpostExecute ","size "+listItems.size());
             MainActivity.this.listItems.addAll(listItems);
-            mListView = (ListView) findViewById(R.id.blob_list_view);
-            adapter=new ListViewAdapter(getApplicationContext(), MainActivity.this.listItems);
-            mListView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
+            MainActivity.this.mListView = (ListView) findViewById(R.id.blob_list_view);
+            MainActivity.this.adapter=new ListViewAdapter(MainActivity.this, MainActivity.this.listItems);
+            MainActivity.this.mListView.setAdapter(MainActivity.this.adapter);
+            MainActivity.this.adapter.notifyDataSetChanged();
         }
     }
 

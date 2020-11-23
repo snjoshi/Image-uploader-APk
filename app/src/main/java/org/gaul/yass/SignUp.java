@@ -108,7 +108,7 @@ public class SignUp extends AppCompatActivity {
                                         finish();
                                     }
                                     else{
-                                        result="account with this username or email already exists! " +
+                                        result="username or email is already taken! " +
                                                 "Email and Username must be unique";
                                         Toast.makeText(getApplicationContext(),result,Toast.LENGTH_LONG).show();
                                     }
