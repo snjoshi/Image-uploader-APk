@@ -30,6 +30,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    implementation 'com.sun.mail:android-mail:1.5.5'
+    implementation 'com.sun.mail:android-activation:1.5.5'
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.amazonaws:aws-android-sdk-s3:2.3.8'
     implementation 'com.amazonaws:aws-android-sdk-core:2.3.8'

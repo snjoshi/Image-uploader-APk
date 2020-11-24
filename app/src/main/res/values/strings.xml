@@ -29,5 +29,7 @@
     <string name="email">email</string>
     <string name="fullname">fullname</string>
     <string name="signuphere"><u>signuphere</u></string>
+    <string name="profile">profile</string>
+    <string name="update">update</string>
 
 </resources>

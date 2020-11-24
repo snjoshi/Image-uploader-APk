@@ -15,64 +15,68 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SignUp extends AppCompatActivity {
+import static org.gaul.yass.SignUp.EMAIL;
+import static org.gaul.yass.SignUp.FULLNAME;
+import static org.gaul.yass.SignUp.PASSWORD;
+import static org.gaul.yass.SignUp.USERNAME;
 
+public class updateProfile extends AppCompatActivity {
     private TextInputEditText textInputEditTextFullName,textInputEditTextUsername,textInputEditTextPassword,
             textInputEditTextEmail;
-    private Button buttonSignUp;
-    private TextView textViewLogIn;
+    private Button buttonUpdate;
     private ProgressBar progressBar;
-    public  static final String SHARED_PREFS ="sharedPrefs";
-    public static final String EMAIL="email";
-    public static final String USERNAME="username";
-    public static final String FULLNAME="fullname";
-    public static final String PASSWORD="password";
     SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
-        sharedPreferences=PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        setContentView(R.layout.activity_update_profile);
+//        setContentView(R.layout.activity_sign_up);
+        sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         progressBar = findViewById(R.id.progress);
         textInputEditTextUsername = findViewById(R.id.username);
         textInputEditTextEmail = findViewById(R.id.email);
         textInputEditTextFullName = findViewById(R.id.fullname);
         textInputEditTextPassword = findViewById(R.id.password);
-        buttonSignUp = findViewById(R.id.buttonSignUp);
-        textViewLogIn = findViewById(R.id.loginText);
-        if(textInputEditTextFullName==null||textInputEditTextEmail==null||textInputEditTextPassword==null||buttonSignUp==null
+        textInputEditTextFullName.setText(sharedPreferences.getString(FULLNAME,""));
+        final String[] email = {sharedPreferences.getString(EMAIL, "")};
+        textInputEditTextEmail.setText(email[0]);
+        textInputEditTextUsername.setText(sharedPreferences.getString(USERNAME,""));
+        textInputEditTextEmail.setEnabled(false);
+        buttonUpdate = findViewById(R.id.buttonUpdate);
+        if(textInputEditTextFullName==null||textInputEditTextEmail==null||textInputEditTextPassword==null||buttonUpdate==null
                 ||progressBar==null)
         {
             Log.i(null,"got null");
         }
-        textViewLogIn.setOnClickListener(new View.OnClickListener() {
+//        textViewLogIn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(getApplicationContext(),LogIn.class);
+//                startActivity(intent);
+//                finish();
+//            }
+//        });
+        buttonUpdate.setOnClickListener(new View.OnClickListener() {
+            String fullname=null,password=null,username=null;
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(),LogIn.class);
-                startActivity(intent);
-                finish();
-            }
-        });
-        buttonSignUp.setOnClickListener(new View.OnClickListener() {
-            String fullname=null,email=null,password=null,username=null;
-            @Override
-            public void onClick(View v) {
-                if(sharedPreferences.getString("username","").equals("")==false)
-                {
-                    String temp="your device is already registered!";
-                    Toast.makeText(getApplicationContext(),temp,Toast.LENGTH_LONG).show();
-                    return;
-                }
+//                if(sharedPreferences.getString("username","").equals("")==false)
+//                {
+//                    String temp="your device is already registered!";
+//                    Toast.makeText(getApplicationContext(),temp,Toast.LENGTH_LONG).show();
+//                    return;
+//                }
                 Log.i(null,"hello there");
-                if(fullname==null||email==null||password==null||username==null)
+
+                fullname=String.valueOf(textInputEditTextFullName.getText());
+                email[0] =String.valueOf(textInputEditTextEmail.getText());
+                password=String.valueOf(textInputEditTextPassword.getText());
+                username=String.valueOf(textInputEditTextUsername.getText());
+                if(fullname==null|| email[0] ==null||password==null||username==null)
                 {
                     Log.i(null,"got null");
                 }
-                fullname=String.valueOf(textInputEditTextFullName.getText());
-                email=String.valueOf(textInputEditTextEmail.getText());
-                password=String.valueOf(textInputEditTextPassword.getText());
-                username=String.valueOf(textInputEditTextUsername.getText());
-                if(fullname.length()>0&&email.length()>0&&password.length()>0&&
+                if(fullname.length()>0&& email[0].length()>0&&password.length()>0&&
                         username.length()>0) {
                     Log.i(null,"hi there");
                     progressBar.setVisibility(View.VISIBLE);
@@ -92,24 +96,24 @@ public class SignUp extends AppCompatActivity {
                             data[0] = fullname;
                             data[1] = username;
                             data[2]= password;
-                            data[3]=email;
-                            PutData putData = new PutData("https://www.byteseq.com/apkphp/signup.php", "POST", field, data);
+                            data[3]= email[0];
+                            PutData putData = new PutData("http://192.168.43.220/LoginRegister/updateProfile.php", "POST", field, data);
                             if (putData.startPut()) {
                                 if (putData.onComplete()) {
                                     progressBar.setVisibility(View.GONE);
                                     String result = putData.getResult();
-                                    if(result.equals("Sign Up Success"))
+                                    if(result.equals("profile updated Successfully"))
                                     {
 //                                      Log.i(null,fullname+email+password+username);
-                                        saveData(fullname,email,username,password);
+                                        saveData(fullname, email[0],username,password);
                                         Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
                                         Intent intent=new Intent(getApplicationContext(),LogIn.class);
                                         startActivity(intent);
                                         finish();
                                     }
                                     else{
-                                        result="username or email is already taken! " +
-                                                "Email and Username must be unique";
+                                        result="username already taken! " +
+                                                "Username must be unique";
                                         Toast.makeText(getApplicationContext(),result,Toast.LENGTH_LONG).show();
                                     }
                                     //End ProgressBar (Set visibility to GONE)
@@ -127,10 +131,7 @@ public class SignUp extends AppCompatActivity {
 
             }
         });
-        //Start ProgressBar first (Set visibility VISIBLE)
-        //Start ProgressBar first (Set visibility VISIBLE)
     }
-
     public void saveData(String fullname,String email,String username,String password) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor=sharedPreferences.edit();
@@ -140,5 +141,4 @@ public class SignUp extends AppCompatActivity {
         editor.putString(PASSWORD,password);
         editor.apply();
     }
-
 }

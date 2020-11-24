@@ -14,10 +14,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -412,6 +414,8 @@ public final class MainActivity extends AppCompatActivity {
             }
 
         }
+        callBroadCast(file);
+        callBroadCast(newFile);
         return filePath;
     }
 
@@ -516,7 +520,9 @@ public final class MainActivity extends AppCompatActivity {
 //                }).start();
 
                 }
+
             }
+//            callBroadCast();
             }
 
 
@@ -587,7 +593,8 @@ public final class MainActivity extends AppCompatActivity {
                         continue;
                     }
                     else if(progress==SelectedImageList.size()) {
-                        Toast.makeText(MainActivity.this, "Images upload successful to "+path, Toast.LENGTH_SHORT).show();
+
+                        Toast.makeText(MainActivity.this, "Upload successful to folder: "+path, Toast.LENGTH_SHORT).show();
                         for (String y : SelectedImageList) {
                             File file = new File(y);
                             Log.i(null, "image " + y + " deleting");
@@ -596,6 +603,7 @@ public final class MainActivity extends AppCompatActivity {
                                 ContentResolver contentResolver = getContentResolver();
                                 contentResolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                                         MediaStore.Images.ImageColumns.DATA + "=?", new String[]{y});
+//                                callBroadCast();
                                 if (!file.exists()) {
                                     Log.i(null, "file deletion success");
                                 } else {
@@ -607,6 +615,7 @@ public final class MainActivity extends AppCompatActivity {
                         }
                         break;
                     }
+
                 }
 //                Log.i(null,"size of uris is "+selectedImageUri.size());
 //                System.out.println("hello world");
@@ -714,6 +723,18 @@ public final class MainActivity extends AppCompatActivity {
 //            }
 //        }).start();
 //    }
+public void callBroadCast(File out) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(out); // out is your output file
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+    } else {
+        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+    }
+
+}
 
     private String getRealPathFromURI(Uri contentURI) {
         String result;

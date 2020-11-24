@@ -64,7 +64,7 @@ public class PutData extends Thread {
             Log.i(null,"connection error");
             setData("slow internet connection");
         } catch (IOException e) {
-            setData(e.toString());
+            setData("Server not responding");
         }
     }
 
