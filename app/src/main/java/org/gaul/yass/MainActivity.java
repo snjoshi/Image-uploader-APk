@@ -164,30 +164,20 @@ public final class MainActivity extends AppCompatActivity {
 
             long totalSize = 0;
             String SelectedImage=x[1];
-
+            Log.i(null,SelectedImage);
             String [] imglist= SelectedImage.split("/");
             String filename=imglist[imglist.length-1];
             System.out.println("Working "+filename);
-
             //getAssets().open("test2.txt");
             File file= new File(SelectedImage);
             System.out.println("File opened "+filename);
-//            String uploadedFileName=gmail+"/"+filename;
-//            Log.i(null,"gmail account "+Email);
-//            Log.i(null,"new file name "+uploadedFileName);
-//            File newFile=new File(uploadedFileName);
-//            boolean d=file.renameTo(newFile);
-//            {
-//                Log.i(null,"rename successful");
-//            }
-//            else{
-//                Log.i(null,"rename failure");
-//            }
+
+
 
             SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            String username = sharedPreferences.getString("username","");
             String email = sharedPreferences.getString("email","");
             String fullname = sharedPreferences.getString("fullname","");
+            String username = sharedPreferences.getString("username", "");
             Log.i(null,username);
             Log.i(null,email);
             Log.i(null,fullname);
@@ -385,6 +375,46 @@ public final class MainActivity extends AppCompatActivity {
 //        }
 //        return result;
 //    }
+    public String renameFile(String filePath) {
+        File file = new File(filePath);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String username = sharedPreferences.getString("username", "");
+        System.out.println("File opened " + filePath);
+
+//            Log.i(null,"gmail account "+Email);
+//        Log.i(null, "new file name " + uploadedFileName);
+        File oldFile = new File(filePath);
+        String oldFileName = filePath;
+//            Toast.makeText(this, SelectedImage, Toast.LENGTH_LONG).show();
+        String segments[] = oldFileName.split("/");
+        String fileName = segments[segments.length - 1];
+        String uploadedFileName = username + "@" + fileName;
+        String newFileName = oldFileName.replace(fileName, uploadedFileName);
+        File newFile = new File(newFileName);
+
+
+        if (!oldFile.isDirectory()) {
+
+            System.out.println("File Name is:" + fileName);
+
+            try {
+                if (oldFile.renameTo(newFile)) {
+                    System.out.println("File renamed successfull !");
+                    return newFileName;
+                } else {
+                    System.out.println("File renamed operation failed");
+                    return filePath;
+                }
+
+
+            } catch (Exception ex) {
+                System.out.println("Exception :" + ex.getMessage());
+            }
+
+        }
+        return filePath;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -442,13 +472,14 @@ public final class MainActivity extends AppCompatActivity {
 //                cursor.moveToFirst();
                 String y= getRealPathFromURI(uri);
 //                Log.i("Path", cursor.getString(column_index));
-
-
+                String newFileName=renameFile(y);
+                SelectedImageList.add(newFileName);
 
 //                    final String y = uri.getPath().substring(5, uri.getPath().length());
 //                    Log.i("Path", y);
 
-                SelectedImageList.add(y);
+
+//                }
             }
             else {
                 Log.i("Info", "Mult Imag Selected");
@@ -474,7 +505,8 @@ public final class MainActivity extends AppCompatActivity {
 //                    final String y = uri.getPath().substring(5, uri.getPath().length());
 //                    Log.i("Path", y);
                     Log.i(null,"imagePath "+y);
-                    SelectedImageList.add(y);
+                    String newFileName=renameFile(y);
+                    SelectedImageList.add(newFileName);
 
 //
 //                new Thread(new Runnable() {
@@ -484,6 +516,7 @@ public final class MainActivity extends AppCompatActivity {
 //                }).start();
 
                 }
+            }
             }
 
 
@@ -657,7 +690,7 @@ public final class MainActivity extends AppCompatActivity {
 //        }
 
         }
-    }
+//    }
 
 //    private void blinkTextView() {
 //        final Handler handler = new Handler();
@@ -799,6 +832,7 @@ public final class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.menu, menu);
         return true;
     }
+
 
     private class BlobListTask extends AsyncTask<String, Void, Collection<String>> {
         List<String> listItems = new ArrayList<>();
