@@ -15,6 +15,17 @@
         android:layout_width="match_parent"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/profileTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/userprofile"
+            android:textSize="20sp"
+            android:gravity="end"
+            android:textColor="#673AB7"/>
+
+
         <ListView
             android:id="@+id/blob_list_view"
             android:layout_width="match_parent"

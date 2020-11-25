@@ -31,5 +31,6 @@
     <string name="signuphere"><u>signuphere</u></string>
     <string name="profile">profile</string>
     <string name="update">update</string>
+    <string name="userprofile"><u>profile</u></string>
 
 </resources>

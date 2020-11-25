@@ -152,30 +152,26 @@ public final class MainActivity extends AppCompatActivity {
 
 
     private class UploadFilesTask extends AsyncTask<String, Integer, Long> {
-
-
+        SharedPreferences sharedPreferences;
+        String username;
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
-
+//            super.onPreExecute();
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            username = sharedPreferences.getString("username", "");
         }
 
         protected Long doInBackground(String... x) {
-
-
-
             long totalSize = 0;
             String SelectedImage=x[1];
             Log.i(null,SelectedImage);
             String [] imglist= SelectedImage.split("/");
             String filename=imglist[imglist.length-1];
+            filename=username+"@"+filename;
             System.out.println("Working "+filename);
             //getAssets().open("test2.txt");
             File file= new File(SelectedImage);
             System.out.println("File opened "+filename);
-
-
-
             SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             String email = sharedPreferences.getString("email","");
             String fullname = sharedPreferences.getString("fullname","");
@@ -200,6 +196,23 @@ public final class MainActivity extends AppCompatActivity {
 //            }
 //            Log.i(null,"metadata "+metadata.getUserMetaDataOf("username"));
             System.out.println("Okay "+filename);
+
+            file = new File(SelectedImage);
+            Log.i(null, "image " + SelectedImage + " deleting");
+            if (file.exists()) {
+                file.delete();
+                ContentResolver contentResolver = getContentResolver();
+                contentResolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        MediaStore.Images.ImageColumns.DATA + "=?", new String[]{SelectedImage});
+//                                callBroadCast();
+                if (!file.exists()) {
+                    Log.i(null, "file deletion success");
+                } else {
+                    Log.i(null, "file could not be deleted");
+                }
+            } else {
+                Log.i(null, "file does not exists");
+            }
             progress += 1;
             publishProgress((int) progress);
             return progress;
@@ -211,12 +224,14 @@ public final class MainActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Long result) {
+
             Log.v("Re","___________________________"+result.toString());
             if (result == SelectedImageList.size()) {
 
                 Log.v("Re","///////////////////////////////"+result.toString());
                 dialog.dismiss();
             }
+//
 
         }
     }
@@ -238,7 +253,6 @@ public final class MainActivity extends AppCompatActivity {
             else{
                 System.out.println("ASCII VALUE:"+dirName[0]+"#");
                 InputStream emptyContent = new ByteArrayInputStream(new byte[0]);
-
                 ObjectMetadata metadata = new ObjectMetadata();
                 metadata.setContentLength(0);
 
@@ -377,47 +391,47 @@ public final class MainActivity extends AppCompatActivity {
 //        }
 //        return result;
 //    }
-    public String renameFile(String filePath) {
-        File file = new File(filePath);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String username = sharedPreferences.getString("username", "");
-        System.out.println("File opened " + filePath);
-
-//            Log.i(null,"gmail account "+Email);
-//        Log.i(null, "new file name " + uploadedFileName);
-        File oldFile = new File(filePath);
-        String oldFileName = filePath;
-//            Toast.makeText(this, SelectedImage, Toast.LENGTH_LONG).show();
-        String segments[] = oldFileName.split("/");
-        String fileName = segments[segments.length - 1];
-        String uploadedFileName = username + "@" + fileName;
-        String newFileName = oldFileName.replace(fileName, uploadedFileName);
-        File newFile = new File(newFileName);
-
-
-        if (!oldFile.isDirectory()) {
-
-            System.out.println("File Name is:" + fileName);
-
-            try {
-                if (oldFile.renameTo(newFile)) {
-                    System.out.println("File renamed successfull !");
-                    return newFileName;
-                } else {
-                    System.out.println("File renamed operation failed");
-                    return filePath;
-                }
-
-
-            } catch (Exception ex) {
-                System.out.println("Exception :" + ex.getMessage());
-            }
-
-        }
-        callBroadCast(file);
-        callBroadCast(newFile);
-        return filePath;
-    }
+//    public String renameFile(String filePath) {
+//        File file = new File(filePath);
+//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+//        String username = sharedPreferences.getString("username", "");
+//        System.out.println("File opened " + filePath);
+//
+////            Log.i(null,"gmail account "+Email);
+////        Log.i(null, "new file name " + uploadedFileName);
+//        File oldFile = new File(filePath);
+//        String oldFileName = filePath;
+////            Toast.makeText(this, SelectedImage, Toast.LENGTH_LONG).show();
+//        String segments[] = oldFileName.split("/");
+//        String fileName = segments[segments.length - 1];
+//        String uploadedFileName = username + "@" + fileName;
+//        String newFileName = oldFileName.replace(fileName, uploadedFileName);
+//        File newFile = new File(newFileName);
+//
+//
+//        if (!oldFile.isDirectory()) {
+//
+//            System.out.println("File Name is:" + fileName);
+//
+//            try {
+//                if (oldFile.renameTo(newFile)) {
+//                    System.out.println("File renamed successfull !");
+//                    return newFileName;
+//                } else {
+//                    System.out.println("File renamed operation failed");
+//                    return filePath;
+//                }
+//
+//
+//            } catch (Exception ex) {
+//                System.out.println("Exception :" + ex.getMessage());
+//            }
+//
+//        }
+//        callBroadCast(file);
+//        callBroadCast(newFile);
+//        return filePath;
+//    }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -476,7 +490,7 @@ public final class MainActivity extends AppCompatActivity {
 //                cursor.moveToFirst();
                 String y= getRealPathFromURI(uri);
 //                Log.i("Path", cursor.getString(column_index));
-                String newFileName=renameFile(y);
+                String newFileName=y;//renameFile(y);
                 SelectedImageList.add(newFileName);
 
 //                    final String y = uri.getPath().substring(5, uri.getPath().length());
@@ -509,7 +523,7 @@ public final class MainActivity extends AppCompatActivity {
 //                    final String y = uri.getPath().substring(5, uri.getPath().length());
 //                    Log.i("Path", y);
                     Log.i(null,"imagePath "+y);
-                    String newFileName=renameFile(y);
+                    String newFileName=y;//renameFile(y);
                     SelectedImageList.add(newFileName);
 
 //
@@ -548,6 +562,7 @@ public final class MainActivity extends AppCompatActivity {
 //                Snackbar.make(view1, "Selected folder "+path, 1500)
 //                        .setAction("Action", null).show();
                 Log.i("SELECTED FOLDER",path);
+                Toast.makeText(getApplicationContext(), "project selected: "+path, Toast.LENGTH_SHORT).show();
 //                Log.i("temp","hi");
                 progress=0;
                 for(final String y:SelectedImageList)
@@ -585,38 +600,38 @@ public final class MainActivity extends AppCompatActivity {
 
                 Log.i(null,"selectedImageListSizeupdation loop "+SelectedImageList.size());
 
-                Log.i(null,"in deleting loop "+SelectedImageList.size());
-                while(progress<=SelectedImageList.size())
-                {
-                    if(progress<SelectedImageList.size())
-                    {
-                        continue;
-                    }
-                    else if(progress==SelectedImageList.size()) {
-
-                        Toast.makeText(MainActivity.this, "Upload successful to folder: "+path, Toast.LENGTH_SHORT).show();
-                        for (String y : SelectedImageList) {
-                            File file = new File(y);
-                            Log.i(null, "image " + y + " deleting");
-                            if (file.exists()) {
-                                file.delete();
-                                ContentResolver contentResolver = getContentResolver();
-                                contentResolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                        MediaStore.Images.ImageColumns.DATA + "=?", new String[]{y});
-//                                callBroadCast();
-                                if (!file.exists()) {
-                                    Log.i(null, "file deletion success");
-                                } else {
-                                    Log.i(null, "file could not be deleted");
-                                }
-                            } else {
-                                Log.i(null, "file does not exists");
-                            }
-                        }
-                        break;
-                    }
-
-                }
+//                Log.i(null,"in deleting loop "+SelectedImageList.size());
+//                while(progress<=SelectedImageList.size())
+//                {
+//                    if(progress<SelectedImageList.size())
+//                    {
+//                        continue;
+//                    }
+//                    else if(progress==SelectedImageList.size()) {
+//
+//                        Toast.makeText(MainActivity.this, "Upload successful to folder: "+path, Toast.LENGTH_SHORT).show();
+//                        for (String y : SelectedImageList) {
+//                            File file = new File(y);
+//                            Log.i(null, "image " + y + " deleting");
+//                            if (file.exists()) {
+//                                file.delete();
+//                                ContentResolver contentResolver = getContentResolver();
+//                                contentResolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//                                        MediaStore.Images.ImageColumns.DATA + "=?", new String[]{y});
+////                                callBroadCast();
+//                                if (!file.exists()) {
+//                                    Log.i(null, "file deletion success");
+//                                } else {
+//                                    Log.i(null, "file could not be deleted");
+//                                }
+//                            } else {
+//                                Log.i(null, "file does not exists");
+//                            }
+//                        }
+//                        break;
+//                    }
+//
+//                }
 //                Log.i(null,"size of uris is "+selectedImageUri.size());
 //                System.out.println("hello world");
 //                for(Uri uri:selectedImageUri)
@@ -723,18 +738,18 @@ public final class MainActivity extends AppCompatActivity {
 //            }
 //        }).start();
 //    }
-public void callBroadCast(File out) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = Uri.fromFile(out); // out is your output file
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-    } else {
-        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-    }
-
-}
+//public void callBroadCast(File out) {
+//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//        Uri contentUri = Uri.fromFile(out); // out is your output file
+//        mediaScanIntent.setData(contentUri);
+//        this.sendBroadcast(mediaScanIntent);
+//    } else {
+//        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+//                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+//    }
+//
+//}
 
     private String getRealPathFromURI(Uri contentURI) {
         String result;
@@ -787,7 +802,17 @@ public void callBroadCast(File out) {
         // TODO: if prefs not set, show settings
 
         client = getS3Client(preferences);
-
+        TextView profileTextView = (TextView)findViewById(R.id.profileTextView);
+        if(profileTextView!=null) {
+            profileTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), updateProfile.class);
+                    startActivity(intent);
+                    finish();
+                }
+            });
+        }
 //        this.mListView = (ListView) findViewById(R.id.blob_list_view);
 //        this.adapter = new ListViewAdapter(this,listItems);
 
