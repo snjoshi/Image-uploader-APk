@@ -29,6 +29,8 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import static org.gaul.yass.SignUp.USERNAME;
+
 public class LogIn extends AppCompatActivity {
     TextInputEditText textInputEditTextUsername,textInputEditTextPassword;
     Button buttonLogIn;
@@ -46,12 +48,10 @@ public class LogIn extends AppCompatActivity {
         textViewSignUp=findViewById(R.id.signUpText);
         forgotPassword=findViewById(R.id.forgotPassword);
         progressBar= findViewById(R.id.progress);
-        String password,username;
+        String username;
         username=sharedpreferences.getString("username","");
-        password=sharedpreferences.getString("password","");
         Log.i("username",username);
-        Log.i("password",password);
-        if(username.length()>0||password.length()>0)
+        if(username.length()>0)
         {
             textInputEditTextUsername.setText(username);
 //            textInputEditTextPassword.setText(password);
@@ -74,8 +74,44 @@ public class LogIn extends AppCompatActivity {
 //                    int val=(int)Math.floor(Math.random()*26);
 //                    password=password+(char)('a'+val);
 //                }
-                DialogFragment dialog = new MyDialogFragment(getApplicationContext());
-                dialog.show(getSupportFragmentManager(), "MyDialogFragmentTag");
+                String username=textInputEditTextUsername.getText().toString();;
+                if(username.length()==0)
+                {
+                    Toast.makeText(getApplicationContext(),"please enter your username",Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    String[] field=new String[1];
+                    String[] data=new String[1];
+                    field[0]="username";
+                    data[0]=username;
+                    PutData readData = new PutData("https://www.byteseq.com/apkphp/readData.php", "POST", field, data);
+                    if(readData.startPut())
+                    {
+                        if(readData.onComplete())
+                        {
+                            String dataFetched=readData.getData();
+                            if(!dataFetched.equals("incorrect username")&&!dataFetched.equals("Error: Database connection")
+                            ) {
+                                String[] userDetails = dataFetched.split(",");
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString("username", userDetails[1].split(":")[1]);
+                                editor.putString("email", userDetails[2].split(":")[1]);
+                                editor.putString("fullname", userDetails[0].split(":")[1]);
+                                editor.apply();
+                                Log.i(null, "datafetched: " + dataFetched);
+//                            Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
+                                DialogFragment dialog = new MyDialogFragment(getApplicationContext());
+                                dialog.show(getSupportFragmentManager(), "MyDialogFragmentTag");
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),dataFetched,Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    }
+
+                }
 //                dialog.
 //                String emailsend,emailbody,emailsubject;
 //                emailsend=sharedpreferences.getString("email","");
@@ -164,17 +200,40 @@ public class LogIn extends AppCompatActivity {
                             String[] data = new String[2];
                             data[0] = username;
                             data[1]= password;
-                            PutData putData = new PutData("http://192.168.43.220/LoginRegister/login.php", "POST", field, data);
+                            PutData putData = new PutData("https://www.byteseq.com/apkphp/login.php", "POST", field, data);
                             if (putData.startPut()) {
                                 if (putData.onComplete()) {
                                     progressBar.setVisibility(View.GONE);
                                     String result = putData.getResult();
                                     if(result.equals("Login Success"))
                                     {
-                                        Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
-                                        Intent intent=new Intent(getApplicationContext(),MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
+                                        data=new String[1];
+                                        field=new String[1];
+                                        field[0]="username";
+                                        data[0]=username;
+                                        PutData readData = new PutData("https://www.byteseq.com/apkphp/readData.php", "POST", field, data);
+                                        if(readData.startPut())
+                                        {
+                                            if(readData.onComplete())
+                                            {
+                                                String dataFetched=readData.getData();
+                                                String[] userDetails=dataFetched.split(",");
+                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                                SharedPreferences.Editor editor=sharedPreferences.edit();
+                                                editor.putString("username",userDetails[1].split(":")[1]);
+                                                editor.putString("email",userDetails[2].split(":")[1]);
+                                                editor.putString("fullname",userDetails[0].split(":")[1]);
+                                                editor.apply();
+                                                  Log.i(null,"datafetched: "+dataFetched);
+                                                Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
+                                                Intent intent=new Intent(getApplicationContext(),MainActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        }
+                                        else{
+                                            Toast.makeText(getApplicationContext(),"error in reading data",Toast.LENGTH_SHORT).show();
+                                        }
                                     }
                                     else{
                                         Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();

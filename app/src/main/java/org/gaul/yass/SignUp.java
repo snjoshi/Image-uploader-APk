@@ -57,12 +57,12 @@ public class SignUp extends AppCompatActivity {
             String fullname=null,email=null,password=null,username=null;
             @Override
             public void onClick(View v) {
-                if(sharedPreferences.getString("username","").equals("")==false)
-                {
-                    String temp="your device is already registered!";
-                    Toast.makeText(getApplicationContext(),temp,Toast.LENGTH_LONG).show();
-                    return;
-                }
+//                if(sharedPreferences.getString("username","").equals("")==false)
+//                {
+//                    String temp="your device is already registered!";
+//                    Toast.makeText(getApplicationContext(),temp,Toast.LENGTH_LONG).show();
+//                    return;
+//                }
                 Log.i(null,"hello there");
                 if(fullname==null||email==null||password==null||username==null)
                 {

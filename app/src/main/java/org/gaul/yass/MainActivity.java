@@ -562,7 +562,7 @@ public final class MainActivity extends AppCompatActivity {
 //                Snackbar.make(view1, "Selected folder "+path, 1500)
 //                        .setAction("Action", null).show();
                 Log.i("SELECTED FOLDER",path);
-                Toast.makeText(getApplicationContext(), "project selected: "+path, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "project selected: "+path, Toast.LENGTH_SHORT).show();
 //                Log.i("temp","hi");
                 progress=0;
                 for(final String y:SelectedImageList)

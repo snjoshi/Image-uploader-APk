@@ -27,10 +27,9 @@ import javax.mail.internet.MimeMessage;
 
 public class MyDialogFragment extends DialogFragment {
     Context mContext;
+    String emailsend;
     public MyDialogFragment()
-    {
-
-    }
+    { }
     public MyDialogFragment(Context context)
     {
         mContext=context;
@@ -53,7 +52,7 @@ public class MyDialogFragment extends DialogFragment {
                     password=password+(char)('a'+val);
                 }
 //                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                String emailsend,emailbody,emailsubject;
+                String emailbody,emailsubject;
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                 emailsend=sharedPreferences.getString("email","");
                 emailsubject="your new password";
@@ -85,7 +84,7 @@ public class MyDialogFragment extends DialogFragment {
                         data[2]= sharedPreferences.getString("password","");
                         data[3]= sharedPreferences.getString("email","");
                         Log.i(null,data[0]+" "+data[1]+" "+data[2]+" "+data[3]);
-                        PutData putData = new PutData("http://192.168.43.220/LoginRegister/updateProfile.php", "POST", field, data);
+                        PutData putData = new PutData("https://www.byteseq.com/apkphp/updateProfile.php", "POST", field, data);
                         if (putData.startPut()) {
                             if (putData.onComplete()) {
 //                                progressBar.setVisibility(View.GONE);
@@ -126,7 +125,12 @@ public class MyDialogFragment extends DialogFragment {
 
         @Override
         protected void onPostExecute(Long result) {
-            Toast.makeText(mContext,"your new password is sent to your registered email id",Toast.LENGTH_LONG).show();
+            if(result!=-1L) {
+                Toast.makeText(mContext, "your new password is sent to your registered email: " + emailsend, Toast.LENGTH_LONG).show();
+            }
+            else{
+                Toast.makeText(mContext,"your registered email is not valid",Toast.LENGTH_LONG).show();
+            }
         }
 
         protected void onProgressUpdate(Integer... progress) {
@@ -182,9 +186,11 @@ public class MyDialogFragment extends DialogFragment {
             }
             catch (AddressException ae) {
                 ae.printStackTrace();
+                return -1L;
             }
             catch (MessagingException me) {
                 me.printStackTrace();
+                return -1L;
             }
             return 2L;
         }

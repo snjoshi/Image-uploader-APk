@@ -97,7 +97,7 @@ public class updateProfile extends AppCompatActivity {
                             data[1] = username;
                             data[2]= password;
                             data[3]= email[0];
-                            PutData putData = new PutData("http://192.168.43.220/LoginRegister/updateProfile.php", "POST", field, data);
+                            PutData putData = new PutData("https://www.byteseq.com/apkphp/updateProfile.php", "POST", field, data);
                             if (putData.startPut()) {
                                 if (putData.onComplete()) {
                                     progressBar.setVisibility(View.GONE);
@@ -107,9 +107,9 @@ public class updateProfile extends AppCompatActivity {
 //                                      Log.i(null,fullname+email+password+username);
                                         saveData(fullname, email[0],username,password);
                                         Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
-                                        Intent intent=new Intent(getApplicationContext(),LogIn.class);
-                                        startActivity(intent);
-                                        finish();
+//                                        Intent intent=new Intent(getApplicationContext(),LogIn.class);
+//                                        startActivity(intent);
+//                                        finish();
                                     }
                                     else{
                                         result="username already taken! " +
@@ -132,7 +132,15 @@ public class updateProfile extends AppCompatActivity {
             }
         });
     }
-    public void saveData(String fullname,String email,String username,String password) {
+
+    @Override
+    public void onBackPressed() {
+        Intent intent=new Intent(getApplicationContext(),MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void saveData(String fullname, String email, String username, String password) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor=sharedPreferences.edit();
         editor.putString(USERNAME,username);
